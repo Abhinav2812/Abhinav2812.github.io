@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Snake game</title>
+  </head>
+  <body>
+
+    <canvas id="game" width=200 height=200></canvas>
+    <pre>
+      <input type="button" value=" up " onclick="simulateKeyPress(38)"></pre>
+  <p>
+    <input type="button" value="left" onclick="simulateKeyPress(37)">
+    <input type="button" value="down" onclick="simulateKeyPress(40)">
+    <input type="button" value="right" onclick="simulateKeyPress(39)">
+  </p>
+    <script type="text/javascript">
+      function simulateKeyPress(character) {
+        evt={'keyCode':character};
+        keydown(evt);
+      }
+      window.onload=function(){
+        game=document.getElementById("game");
+        ctx=game.getContext("2d");
+        document.addEventListener("keydown",keydown);
+        setInterval(play,1000/15);
+      }
+      flag=0;
+      if(localStorage.maxscore==null)
+        localStorage.maxscore=0;
+      maxscore=Number(localStorage.maxscore);
+      ax=0;
+      ay=0;
+      xv=yv=0;
+      gs=20; //size of each snake element
+      px=document.documentElement.clientWidth/40;
+      py=document.documentElement.clientHeight/40;
+      keybuffer=[];
+      length=5;
+      trail=[];
+      prevkey="";
+      function play()
+      {
+        if(keybuffer.length>0)
+        {
+            keyclick(keybuffer[0]);
+            keybuffer.shift();
+        }
+        game.width=Math.floor(document.documentElement.clientWidth*0.99/20)*20;
+        game.height=Math.floor(document.documentElement.clientHeight*0.8/20)*20;
+        tcx=Math.floor(game.width/gs);
+        tcy=Math.floor(game.height/gs);
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,game.width,game.height);
+        while((px==ax&&py==ay)||flag==1||(ax>tcx||ax<0||ay>tcy||ay<0))
+        {
+          if(px==ax&&py==ay&&(flag==0))
+            length++;
+          console.log("Bhuk lagi,kha liya");
+          ax=Math.floor(Math.random()*tcx);
+          ay=Math.floor(Math.random()*tcy);
+          flag=0;
+          for(i=0;i<trail.length;i++)
+            if(trail[i].x==ax&&trail[i].y==ay)
+            {
+              flag=1;
+              break;
+            }
+        }
+        if(px>=tcx)
+          px=0;
+        else if(px<0)
+          px=tcx-1;
+        if(py>=tcy)
+          py=0;
+        else if(py<0)
+          py=tcy-1;
+        ctx.fillStyle="red";
+        ctx.fillRect(gs*ax,gs*ay,gs-2,gs-2);
+        ctx.fillStyle="lime";
+        for(var i=0;i<trail.length;i++)
+        {
+          //console.log((gs*trail[i].x),(gs*trail[i].y));
+          ctx.fillRect(gs*trail[i].x,gs*trail[i].y,gs-2,gs-2);
+          if(trail[i].x==px&&trail[i].y==py){
+            //khud ko kyu kata be
+            length=5;
+          }
+        }
+        trail.push({x:px,y:py});
+        while(trail.length>length)
+        {
+          trail.shift();
+        }
+        px=px+xv;
+        py=py+yv;
+        flag=0;
+        ctx.fillStyle="white";
+        ctx.font="30px Arial";
+        ctx.fillText(("Score:"+(length-5)),10,50);
+        if((length-5)>maxscore)
+        {
+            maxscore=length-5;
+            localStorage.maxscore=maxscore;
+        }
+        ctx.fillText("MaxScore:"+maxscore,10,100);
+
+      }
+      function keydown(evt)
+      {
+        if(keybuffer.length===0 || (keybuffer[keybuffer.length-1].keyCode!==evt.keyCode)) 
+            keybuffer.push(evt);
+      }
+      function keyclick(evt)
+      {
+        console.log(evt);
+        switch (evt.keyCode) {
+            case 37:case 65:
+            //move left
+            if(prevkey=='R') break;
+            xv=-1;
+            yv=0;
+            prevkey='L';
+            break;
+            case 38:case 87:
+              //move up
+              if(prevkey=='D') break;
+              xv=0;
+              yv=-1;
+              prevkey='U';
+              break;
+              case 39:case 68:
+                //move right
+                if(prevkey=='L') break;
+                xv=1;
+                yv=0;
+                prevkey='R';
+                break;
+              case 40:case 83:
+                //move down
+                if(prevkey=='U') break;
+                xv=0;
+                yv=1;
+                prevkey='D';
+                break;
+              default:
+                console.log(evt.keyCode);
+        }
+      }
+    </script>
+  </body>
+</html>
+
